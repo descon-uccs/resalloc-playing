@@ -49,3 +49,4 @@ if __name__ == "__main__":
     A = createAMatrixDual(n, w2, f2, IR2)
     
     result = opt.linprog(C,A,B)
+    print(result)
