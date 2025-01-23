@@ -42,7 +42,7 @@ def createAMatrixDual(n,w,f,I) :
 if __name__ == "__main__":
     n = 2
     w2 = [0,1,1,1]
-    f2 = [0,1,.5,1/3]
+    f2 = [0,1,0,0]
     IR2 = createISet(n)
     C = createCVectorDual(n,w2,f2,IR2) 
     B = createBVectorDual(n, w2, f2, IR2)
