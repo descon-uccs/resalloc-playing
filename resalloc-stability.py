@@ -51,5 +51,5 @@ if __name__ == "__main__":
     B = createBVectorPrimal(n, w, f, I,S=0)
     A = createAMatrixPrimal(n, w, f, I)
     
-    result = opt.linprog(C,A,B)
+    result = opt.linprog(C,A_eq=A,b_eq=B) # doing it all with equality constraints to hit S
     print(-1/result.fun)
