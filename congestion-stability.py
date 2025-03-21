@@ -88,14 +88,15 @@ def findLambdaMu(d) :
 if __name__ == "__main__":
     n = 4
     
-    b = [lambda x: 1, lambda x: x, lambda x: x*x]
+    b4 = [lambda x: 1, lambda x: x, lambda x: x*x, lambda x: pow(x,3)]
+    b = b4[:2]
     
     # ftest = [lambda x: 1, lambda x: x+1]
     fself = b
     fmc = [lambda x: b[0](x)+(x-1)*(b[0](x)-b[0](x-1)), lambda x: b[1](x)+(x-1)*(b[1](x)-b[1](x-1))]
     
-    f=fself
-    SS=np.linspace(0,1)
+    f=fmc
+    SS=np.linspace(0,2)
     
     d = len(b)-1
     lamb,mu = findLambdaMu(d)
