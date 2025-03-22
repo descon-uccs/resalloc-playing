@@ -39,7 +39,7 @@ def createAMatrixPrimal(n,w,f,I) :
         
 
 if __name__ == "__main__":
-    n = 2
+    n = 4
     w = [0] + [1 for _ in range(n)]
     fes = [0] + [w[i]/i for i in range(1,len(w))]+[0]
     fmc = [0] + [w[i] - w [i-1] for i in range(1,len(w))] + [0]

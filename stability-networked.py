@@ -79,7 +79,7 @@ def Cvector(n,w,f,I) :
 
         
 if __name__== "__main__" :
-    n = 2
+    n = 6
     I = createISetNetwork(n)
     w = [0] + [1 for _ in range(n)]
     fes = [0] + [w[i]/i for i in range(1,len(w))]+[0]
@@ -87,9 +87,9 @@ if __name__== "__main__" :
     # fmc = [0,1] + [0 for i in range(1,n+1)]
     
     
-    S=.1
+    S=1/3
     
-    f = [fmc, fmc]
+    f = [fmc]*n
     A = AMatrix(n,w,f,I)
     B = Bvector(n, w, f, I,S=S)
     Aeq = AMatrixEq(n,w,f,I)
