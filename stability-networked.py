@@ -57,8 +57,20 @@ def AMatrix(n,w,f,I) :
         A[n,:] = A[:n,:].sum(0)
     return A
 
-def Bvector(n,w,f,I,S=0) :
-    return np.array([[0]*n + [-S]]).T
+def Bvector(n,w,f,I,S=0,mode='unconstrained') :
+    '''
+    Modes:
+        - 'unconstrained': stability can be allocated to agents in any way
+        - 'one': all stability is allocated to a single agent
+        - 'even': stability is split evenly among the agents
+    '''
+    if mode=='unconstrained' :
+        B = np.array([[0]*n + [-S]]).T
+    if mode == 'one' :
+        B = np.array([[-S]+[0]*(n-1) + [-S]]).T
+    if mode == 'even' :
+        B = np.array([[-S/n]*n + [-S]]).T
+    return B
 
 def AMatrixEq(n,w,f,I) :
     A = np.empty([1,len(I)])
@@ -79,7 +91,7 @@ def Cvector(n,w,f,I) :
 
         
 if __name__== "__main__" :
-    n = 6
+    n = 7
     I = createISetNetwork(n)
     w = [0] + [1 for _ in range(n)]
     fes = [0] + [w[i]/i for i in range(1,len(w))]+[0]
@@ -87,11 +99,12 @@ if __name__== "__main__" :
     # fmc = [0,1] + [0 for i in range(1,n+1)]
     
     
-    S=1/3
+    S=0.1
+    mode='even'
     
-    f = [fmc]*n
+    f = [fes]*(n)
     A = AMatrix(n,w,f,I)
-    B = Bvector(n, w, f, I,S=S)
+    B = Bvector(n, w, f, I,S=S,mode=mode)
     Aeq = AMatrixEq(n,w,f,I)
     Beq = BvectorEq(n,w,f,I)
     C = Cvector(n, w, f, I)

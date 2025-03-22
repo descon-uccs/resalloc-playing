@@ -39,7 +39,7 @@ def createAMatrixPrimal(n,w,f,I) :
         
 
 if __name__ == "__main__":
-    n = 4
+    n = 6
     w = [0] + [1 for _ in range(n)]
     fes = [0] + [w[i]/i for i in range(1,len(w))]+[0]
     fmc = [0] + [w[i] - w [i-1] for i in range(1,len(w))] + [0]
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     
     f = fes
     C = createCVectorPrimal(n,w,f,I)
-    B = createBVectorPrimal(n, w, f, I,S=0)
+    B = createBVectorPrimal(n, w, f, I,S=.6)
     A = createAMatrixPrimal(n, w, f, I)
     
     result = opt.linprog(C,A_eq=A,b_eq=B) # doing it all with equality constraints to hit S
