@@ -45,50 +45,62 @@ def checkINetwork(n) :
                 duplicates += 1
     return sums, duplicates
         
-# create I
-def createISetPrimal(n) :
-    I = set()
-    for a in range(n+1) :
-        for x in range(n+1) :
-            for b in range(n+1) :
-                if a+x+b>0 and a+x+b<n+1 :
-                    I.add((a,x,b))
-    return I
+def AMatrix(n,w,f,I) :
+    # f is length-n
+    A = np.empty([n+1,len(I)])
+    for i,theta in enumerate(I) :
+        for j in range(n) :
+            aj = theta[j][0]
+            bj = theta[j][2]
+            Atj = sum([theta[k][0] + theta[k][1] for k in range(n)]) # note: with non-complete network, this needs to be changed!
+            A[j,i] = -(aj*f[j][Atj] - bj*f[j][Atj+1])
+        A[n,:] = A[:n,:].sum(0)
+    return A
 
-def createCVectorPrimal(n,w,f,I) :
+def Bvector(n,w,f,I,S=0) :
+    return np.array([[0]*n + [-S]]).T
+
+def AMatrixEq(n,w,f,I) :
+    A = np.empty([1,len(I)])
+    for i,theta in enumerate(I) :
+        At = sum([theta[k][0] + theta[k][1] for k in range(n)])
+        A[0,i] = w[At]
+    return A
+
+def BvectorEq(n,w,f,I) :
+    return np.array([1])
+
+def Cvector(n,w,f,I) :
     C = np.empty(len(I))
     for i,theta in enumerate(I) :
-        a,x,b = theta
-        C[i] = -w[b+x]
+        Bt = sum([theta[k][2] + theta[k][1] for k in range(n)])
+        C[i] = -w[Bt]
     return C
 
-def createBVectorPrimal(n,w,f,I,S=0) :
-    return np.array([-S,1])
-
-def createAMatrixPrimal(n,w,f,I) :
-    A = np.empty([2,len(I)])
-    for i,theta in enumerate(I) :
-        a,x,b = theta
-        A[0,i] = -(a*f[a+x] - b*f[a+x+1])
-        A[1,i] = w[a+x]
-    return A
         
 if __name__== "__main__" :
-    I = createISetNetwork(2)
-    print(I)
-
-# if __name__ == "__main__":
-#     n = 2
-#     w = [0] + [1 for _ in range(n)]
-#     fes = [0] + [w[i]/i for i in range(1,len(w))]+[0]
-#     fmc = [0] + [w[i] - w [i-1] for i in range(1,len(w))] + [0]
-#     # fmc = [0,1] + [0 for i in range(1,n+1)]
-#     I = createISetPrimal(n)
+    n = 2
+    I = createISetNetwork(n)
+    w = [0] + [1 for _ in range(n)]
+    fes = [0] + [w[i]/i for i in range(1,len(w))]+[0]
+    fmc = [0] + [w[i] - w [i-1] for i in range(1,len(w))] + [0]
+    # fmc = [0,1] + [0 for i in range(1,n+1)]
     
-#     f = fes
-#     C = createCVectorPrimal(n,w,f,I)
-#     B = createBVectorPrimal(n, w, f, I,S=0)
-#     A = createAMatrixPrimal(n, w, f, I)
     
-#     result = opt.linprog(C,A_eq=A,b_eq=B) # doing it all with equality constraints to hit S
-#     print(-1/result.fun)
+    S=.1
+    
+    f = [fmc, fmc]
+    A = AMatrix(n,w,f,I)
+    B = Bvector(n, w, f, I,S=S)
+    Aeq = AMatrixEq(n,w,f,I)
+    Beq = BvectorEq(n,w,f,I)
+    C = Cvector(n, w, f, I)
+    
+    result = opt.linprog(C,
+                         A_ub=A,
+                         b_ub=B,
+                         A_eq=Aeq,
+                         b_eq=Beq)
+    print(-1/result.fun)
+    
+    
