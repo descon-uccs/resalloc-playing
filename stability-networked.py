@@ -9,6 +9,7 @@ Created on Fri Mar  7 15:17:11 2025
 import scipy.optimize as opt
 import numpy as np
 import matplotlib.pyplot as plt
+from math import factorial
 
 
 # create networked I
@@ -104,7 +105,9 @@ class PoAPlotter :
             fes = [0] + [w[i]/i for i in range(1,len(w))]+[0]
             self.f = [fes]*n
         elif ftype == 'opt':
-            pass
+            thesum = lambda j : sum([1/factorial(i) for i in range(0,j)])
+            fopt = [0] + [factorial(j-1)/(np.e-1)*(np.e-thesum(j)) for j in range(1,n+3)] # longer than we need, it's ok
+            self.f = [fopt]*n
         self.smallfontsize = 12
         self.medfontsize = 14
         self.largefontsize = 16
@@ -163,10 +166,8 @@ class PoAPlotter :
         
         return ax
     
-        
-        
-if __name__== "__main__" :
-    
+def createPlots() :
+    # call this function to create all the plots we need (and more!)
     
     # plots with unconstrained stability margin, ES (various n) and MC (n=2)
     fignum = 35
@@ -184,6 +185,11 @@ if __name__== "__main__" :
     plotter2MC.plotPoA([0,1],ax=ESax,label='MC, n=2')
     # conjecture: the ES PoA is given by 1/((2n-1)/n - S). Matches nicely what we have here!
     
+    # can uncomment the following to get a "Gairing" plot, but it's not very interesting. Actually it sits *almost* exactly between the n=2 and n=3 ES traces.
+    # plotter2Opt = PoAPlotter(2,ftype='opt')
+    # plotter2Opt.plotPoA([0,.6],ax = ESax,label = 'OPT, n=2')
+    
+    
     # plots for ES, individual values of n, comparing unconstrained SM with putting all the SM on a single player
     axOne = None
     fignum = 36
@@ -194,5 +200,11 @@ if __name__== "__main__" :
         one = ', one'
         axOne = plotter.plotPoA([0,(n-1)/n],mode='unconstrained',fignum=fignum+n,label=label+uncon)
         plotter.plotPoA([0,0.6472],mode='one',ax=axOne,label=label+one)
+        
+if __name__== "__main__" :
+    
+    
+    createPlots()
+    
     
     
