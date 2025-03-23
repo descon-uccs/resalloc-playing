@@ -8,6 +8,7 @@ Created on Fri Mar  7 15:17:11 2025
 
 import scipy.optimize as opt
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 # create networked I
@@ -89,31 +90,88 @@ def Cvector(n,w,f,I) :
         C[i] = -w[Bt]
     return C
 
+class PoAPlotter :
+    def __init__(self,n,wtype='setcover',ftype='mc') :
+        self.n = n
+        self.I = createISetNetwork(n)
+        if wtype=='setcover':
+            self.w = [0] + [1 for _ in range(n)]
+        w = self.w
+        if ftype == 'mc':
+            fmc = [0] + [w[i] - w[i-1] for i in range(1,len(w))] + [0]
+            self.f = [fmc]*n
+        elif ftype == 'es':
+            fes = [0] + [w[i]/i for i in range(1,len(w))]+[0]
+            self.f = [fes]*n
+        elif ftype == 'opt':
+            pass
+    
+    def PoA(self,S=0,mode='unconstrained') :
+        I = self.I
+        n = self.n
+        w = self.w
+        f = self.f
+        A = AMatrix(n,w,f,I)
+        B = Bvector(n, w, f, I,S=S,mode=mode)
+        Aeq = AMatrixEq(n,w,f,I)
+        Beq = BvectorEq(n,w,f,I)
+        C = Cvector(n, w, f, I)
+        
+        result = opt.linprog(C,
+                             A_ub=A,
+                             b_ub=B,
+                             A_eq=Aeq,
+                             b_eq=Beq)
+        return -1/result.fun
+    
+    def plotPoA(self,Srange,mode='unconstrained',fignum=13,label=None,ax=None) :
+        # Srange is a tuple defining a closed interval for stability margin
+        SS = list(np.linspace(Srange[0], Srange[1], 50))
+        PoAs = []
+        for S in SS :
+            PoAs.append(self.PoA(S=S,mode=mode))
+        
+        if not ax :
+            fig = plt.figure(num=fignum)
+            fig.clf()
+            ax = fig.add_subplot(1,1,1)  
+        ax.plot(SS,PoAs,label=label)
+        if label :
+            ax.legend()
+        ax.set_xlim(left=0)
+        ax.set_ylim([0.5,1])
+        return ax
+    
+        
         
 if __name__== "__main__" :
-    n = 7
-    I = createISetNetwork(n)
-    w = [0] + [1 for _ in range(n)]
-    fes = [0] + [w[i]/i for i in range(1,len(w))]+[0]
-    fmc = [0] + [w[i] - w [i-1] for i in range(1,len(w))] + [0]
-    # fmc = [0,1] + [0 for i in range(1,n+1)]
     
     
-    S=0.1
-    mode='even'
+    # plots with unconstrained stability margin, ES (various n) and MC (n=2)
+    fignum = 35
+    plotter2MC = PoAPlotter(2,ftype='mc')    
+    ESplotters = [PoAPlotter(n,ftype='es') for n in range(2,7)]
+    ESax = None
+    for plotter in ESplotters :
+        n = plotter.n
+        label = 'ES, n=' + str(n)
+        if ESax :
+            plotter.plotPoA([0,(n-1)/n],mode='unconstrained',ax=ESax,label=label)
+        else :
+            ESax = plotter.plotPoA([0,(n-1)/n],mode='unconstrained',fignum=fignum,label=label)
+    ESax.set_xlim([0,1])
+    plotter2MC.plotPoA([0,1],ax=ESax,label='MC, n=2')
+    # conjecture: the ES PoA is given by 1/((2n-1)/n - S). Matches nicely what we have here!
     
-    f = [fes]*(n)
-    A = AMatrix(n,w,f,I)
-    B = Bvector(n, w, f, I,S=S,mode=mode)
-    Aeq = AMatrixEq(n,w,f,I)
-    Beq = BvectorEq(n,w,f,I)
-    C = Cvector(n, w, f, I)
-    
-    result = opt.linprog(C,
-                         A_ub=A,
-                         b_ub=B,
-                         A_eq=Aeq,
-                         b_eq=Beq)
-    print(-1/result.fun)
+    # plots for ES, individual values of n, comparing unconstrained SM with putting all the SM on a single player
+    axOne = None
+    fignum = 36
+    for plotter in ESplotters :
+        n = plotter.n
+        label = 'ES, n='+str(n)
+        uncon = ', unconstrained'
+        one = ', one'
+        axOne = plotter.plotPoA([0,(n-1)/n],mode='unconstrained',fignum=fignum+n,label=label+uncon)
+        plotter.plotPoA([0,0.6472],mode='one',ax=axOne,label=label+one)
     
     
