@@ -105,6 +105,10 @@ class PoAPlotter :
             self.f = [fes]*n
         elif ftype == 'opt':
             pass
+        self.smallfontsize = 12
+        self.medfontsize = 14
+        self.largefontsize = 16
+        self.linewidth = 3
     
     def PoA(self,S=0,mode='unconstrained') :
         I = self.I
@@ -134,12 +138,29 @@ class PoAPlotter :
         if not ax :
             fig = plt.figure(num=fignum)
             fig.clf()
-            ax = fig.add_subplot(1,1,1)  
-        ax.plot(SS,PoAs,label=label)
+            ax = fig.add_subplot(1,1,1)
+        ax.plot(SS,PoAs,label=label, linewidth=self.linewidth)
         if label :
             ax.legend()
         ax.set_xlim(left=0)
         ax.set_ylim([0.5,1])
+    
+        
+        # Styling
+        ax.set_title("Price of Anarchy vs. S", fontsize=self.largefontsize)
+        ax.set_xlabel("S", fontsize=self.medfontsize)
+        ax.set_ylabel("Price of Anarchy", fontsize=self.medfontsize)
+        
+        # Gridlines
+        ax.grid(True, which='both', linestyle='--', linewidth=0.5, alpha=0.7)
+        
+        # Legend
+        if label:
+            ax.legend(fontsize=self.smallfontsize)
+        
+        # Optional: nicer tick label formatting
+        ax.tick_params(axis='both', which='major', labelsize=self.smallfontsize)
+        
         return ax
     
         
@@ -149,7 +170,7 @@ if __name__== "__main__" :
     
     # plots with unconstrained stability margin, ES (various n) and MC (n=2)
     fignum = 35
-    plotter2MC = PoAPlotter(2,ftype='mc')    
+    plotter2MC = PoAPlotter(2,ftype='mc')
     ESplotters = [PoAPlotter(n,ftype='es') for n in range(2,7)]
     ESax = None
     for plotter in ESplotters :
