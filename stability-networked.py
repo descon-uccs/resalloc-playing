@@ -10,7 +10,10 @@ import scipy.optimize as opt
 import numpy as np
 import matplotlib.pyplot as plt
 from math import factorial
+import os
 
+import matplotlib as mpl
+mpl.rcParams['pdf.fonttype'] = 42
 
 # create networked I
 def createISetNetwork(n) :
@@ -166,7 +169,15 @@ class PoAPlotter :
         
         return ax
     
-def createPlots() :
+    
+def save_ax_as_pdf(ax, filename="my_plot.pdf"):
+    directory = 'figures'
+    fig = ax.figure
+    os.makedirs(directory, exist_ok=True)
+    fig.savefig(directory+'/'+filename, format="pdf", bbox_inches="tight")
+
+
+def createPlots(save=False) :
     # call this function to create all the plots we need (and more!)
     
     # plots with unconstrained stability margin, ES (various n) and MC (n=2)
@@ -183,6 +194,9 @@ def createPlots() :
             ESax = plotter.plotPoA([0,(n-1)/n],mode='unconstrained',fignum=fignum,label=label)
     ESax.set_xlim([0,1])
     plotter2MC.plotPoA([0,1],ax=ESax,label='MC, n=2')
+    if save :
+        save_ax_as_pdf(ESax,'Figure_1.pdf')
+    
     # conjecture: the ES PoA is given by 1/((2n-1)/n - S). Matches nicely what we have here!
     
     # can uncomment the following to get a "Gairing" plot, but it's not very interesting. Actually it sits *almost* exactly between the n=2 and n=3 ES traces.
@@ -200,11 +214,14 @@ def createPlots() :
         one = ', one'
         axOne = plotter.plotPoA([0,(n-1)/n],mode='unconstrained',fignum=fignum+n,label=label+uncon)
         plotter.plotPoA([0,0.6472],mode='one',ax=axOne,label=label+one)
+        if save :
+            save_ax_as_pdf(axOne,str(fignum+n)+'.pdf')
+        
         
 if __name__== "__main__" :
     
     
-    createPlots()
+    createPlots(save=True)
     
     
     
